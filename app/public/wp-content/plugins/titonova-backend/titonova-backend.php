@@ -289,7 +289,7 @@ CSS;
         'brandPalette' => [
             '#0f172a',
             '#1f2937',
-            '#0ea5e9',
+            '#000080',
             '#22c55e',
             '#f59e0b',
             '#ef4444'
@@ -5766,7 +5766,7 @@ function titonova_detect_intent_and_context(string $prompt): array
         'features' => ['Fast launch', 'Modern design system', 'SEO-ready content', 'Conversion-focused'],
         'tagline' => 'Built for your business. Ready for the world.',
         'gallery' => ['business', 'technology', 'office', 'teamwork', 'startup'],
-        'palette' => ['#020d08', '#00ff9c', '#eafff4']
+        'palette' => ['#020d08', '#000080', '#eafff4']
     ];
 
     $selected = $defaults;
@@ -6353,15 +6353,15 @@ function titonova_detect_global_reach(string $clean): bool
 function titonova_pick_palette(string $tone, string $style, array $fallback): array
 {
     $palettes = [
-        'premium' => ['#0b0b0f', '#d6b36a', '#fff7e8'],
-        'friendly' => ['#0b1d1f', '#6be8c7', '#eafff6'],
-        'modern' => ['#0b1120', '#60f5b2', '#effff8'],
-        'bold' => ['#0b1020', '#ff4f8b', '#fff0f5'],
-        'minimal' => ['#0f1115', '#cbd5e1', '#f8fafc'],
-        'futuristic' => ['#080b1a', '#7dd3fc', '#e0f2fe'],
-        'playful' => ['#1a1033', '#ffcf4a', '#fff7d6'],
-        'elegant' => ['#0f0a14', '#c4b5fd', '#f5f3ff'],
-        'professional' => ['#0a1526', '#7bd3ff', '#f1f8ff'],
+        'premium' => ['#0b0b0f', '#000080', '#fff7e8'],
+        'friendly' => ['#0b1d1f', '#000080', '#eafff6'],
+        'modern' => ['#0b1120', '#000080', '#effff8'],
+        'bold' => ['#0b1020', '#000080', '#fff0f5'],
+        'minimal' => ['#0f1115', '#000080', '#f8fafc'],
+        'futuristic' => ['#080b1a', '#000080', '#e0f2fe'],
+        'playful' => ['#1a1033', '#000080', '#fff7d6'],
+        'elegant' => ['#0f0a14', '#000080', '#f5f3ff'],
+        'professional' => ['#0a1526', '#000080', '#f1f8ff'],
     ];
 
     if (isset($palettes[$style])) {
