@@ -106,7 +106,7 @@ function titonova_enqueue_inline_edit_hover_ui(): void
 
     $css = <<<CSS
 :root {
-    --titonova-brand-rgb: 10, 36, 99;
+    --titonova-brand-rgb: 0, 0, 128;
 }
 
 [data-tn-editable],
