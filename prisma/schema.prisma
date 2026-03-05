@@ -1,0 +1,216 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  OWNER
+  ADMIN
+  EDITOR
+  VIEWER
+}
+
+enum ProjectStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  ARCHIVED
+}
+
+enum PageStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum GenerationStatus {
+  QUEUED
+  RUNNING
+  SUCCEEDED
+  FAILED
+}
+
+enum SubscriptionStatus {
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+}
+
+enum UsageAction {
+  GENERATE
+  PUBLISH
+  EXPORT
+  BILLING
+}
+
+model User {
+  id               String         @id @default(uuid()) @db.Uuid
+  email            String         @unique
+  name             String?
+  role             UserRole       @default(OWNER)
+  isActive         Boolean        @default(true)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  projects         Project[]
+  subscriptions    Subscription[]
+  usageLogs        UsageLog[]
+
+  @@map("users")
+}
+
+model Project {
+  id               String         @id @default(uuid()) @db.Uuid
+  ownerId          String         @db.Uuid
+  name             String
+  slug             String
+  description      String?
+  status           ProjectStatus  @default(DRAFT)
+  domain           String?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  owner            User           @relation(fields: [ownerId], references: [id])
+  pages            Page[]
+  sections         PageSection[]
+  generations      AiGeneration[]
+  themes           Theme[]
+  templates        Template[]
+  usageLogs        UsageLog[]
+
+  @@unique([ownerId, slug])
+  @@index([ownerId])
+  @@map("projects")
+}
+
+model Page {
+  id               String      @id @default(uuid()) @db.Uuid
+  projectId        String      @db.Uuid
+  title            String
+  slug             String
+  status           PageStatus  @default(DRAFT)
+  metaTitle        String?
+  metaDescription  String?
+  contentJson      Json?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  project          Project     @relation(fields: [projectId], references: [id])
+  sections         PageSection[]
+  generations      AiGeneration[]
+
+  @@unique([projectId, slug])
+  @@index([projectId])
+  @@map("pages")
+}
+
+model PageSection {
+  id               String   @id @default(uuid()) @db.Uuid
+  projectId        String   @db.Uuid
+  pageId           String   @db.Uuid
+  type             String
+  order            Int      @default(0)
+  dataJson         Json
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  project          Project  @relation(fields: [projectId], references: [id])
+  page             Page     @relation(fields: [pageId], references: [id])
+
+  @@index([projectId])
+  @@index([pageId])
+  @@map("page_sections")
+}
+
+model AiGeneration {
+  id               String            @id @default(uuid()) @db.Uuid
+  projectId        String            @db.Uuid
+  pageId           String?           @db.Uuid
+  prompt           String
+  outputJson       Json?
+  model            String?
+  status           GenerationStatus  @default(QUEUED)
+  errorMessage     String?
+  tokensUsed       Int               @default(0)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  project          Project           @relation(fields: [projectId], references: [id])
+  page             Page?             @relation(fields: [pageId], references: [id])
+
+  @@index([projectId])
+  @@index([pageId])
+  @@map("ai_generations")
+}
+
+model Theme {
+  id               String   @id @default(uuid()) @db.Uuid
+  projectId        String?  @db.Uuid
+  name             String
+  paletteJson      Json?
+  tokensJson       Json?
+  isDefault        Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  project          Project? @relation(fields: [projectId], references: [id])
+
+  @@index([projectId])
+  @@map("themes")
+}
+
+model Template {
+  id               String   @id @default(uuid()) @db.Uuid
+  projectId        String?  @db.Uuid
+  name             String
+  category         String?
+  sectionsJson     Json?
+  isPublished      Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  project          Project? @relation(fields: [projectId], references: [id])
+
+  @@index([projectId])
+  @@map("templates")
+}
+
+model Subscription {
+  id               String              @id @default(uuid()) @db.Uuid
+  userId           String              @db.Uuid
+  provider         String
+  providerPlanId   String?
+  providerSubId    String?
+  status           SubscriptionStatus  @default(TRIALING)
+  currentPeriodEnd DateTime?
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+
+  user             User                @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@map("subscriptions")
+}
+
+model UsageLog {
+  id               String       @id @default(uuid()) @db.Uuid
+  userId           String       @db.Uuid
+  projectId        String?      @db.Uuid
+  action           UsageAction
+  tokensUsed       Int          @default(0)
+  costUsd          Decimal?     @db.Decimal(10, 4)
+  metaJson         Json?
+  createdAt        DateTime     @default(now())
+
+  user             User         @relation(fields: [userId], references: [id])
+  project          Project?     @relation(fields: [projectId], references: [id])
+
+  @@index([userId])
+  @@index([projectId])
+  @@map("usage_logs")
+}
